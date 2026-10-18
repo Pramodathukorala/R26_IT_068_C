@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Camera Monitor</title>
+<style>
+  :root{
+    --bg:#f4f5f7; --card:#ffffff; --line:#e3e5e8; --text:#1d2127; --muted:#6b7280;
+    --ok:#16a34a; --bad:#dc2626; --snake:#16a34a; --scorp:#d97706; --accent:#2563eb;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#111418; --card:#1a1e24; --line:#2a3038; --text:#e6e8eb; --muted:#9aa3ad; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font-family:"Segoe UI",system-ui,sans-serif;font-size:14px}
+  header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+         padding:14px 20px;background:var(--card);border-bottom:1px solid var(--line)}
+  header h1{margin:0;font-size:17px;font-weight:600}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+        font-size:12px;background:var(--bg);border:1px solid var(--line)}
+  .pill i{width:8px;height:8px;border-radius:50%;background:var(--bad)}
+  .pill.live i{background:var(--ok)}
+  .server{margin-left:auto;display:flex;gap:6px;align-items:center;color:var(--muted);font-size:12px}
+  .server input{width:200px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;
+                background:var(--bg);color:var(--text);font:inherit}
+  button{padding:6px 12px;border:1px solid var(--line);border-radius:6px;background:var(--card);
+         color:var(--text);font:inherit;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  main{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;padding:16px 20px;
+       max-width:1600px;margin:0 auto}
+  @media (max-width:900px){main{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .card h2{margin:0;padding:10px 14px;font-size:12px;font-weight:600;text-transform:uppercase;
+           letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--line)}
+  .side .card + .card{margin-top:16px}
+
+  .video{position:relative;background:#000;aspect-ratio:16/9}
+  .video img{width:100%;height:100%;object-fit:contain;display:block}
+  .video .msg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+              color:#cbd5e1;font-size:14px;text-align:center;padding:20px}
+  .video.down .msg{display:flex}
+  .toolbar{display:flex;gap:8px;padding:10px 14px;flex-wrap:wrap}
+
+  .alert-banner{display:none;margin:16px 20px 0;padding:12px 16px;border-radius:8px;
+                background:var(--bad);color:#fff;font-weight:600}
+  .alert-banner.on{display:block}
+
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+  .stat{background:var(--card);padding:12px 14px}
+  .stat b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  .list{max-height:300px;overflow:auto}
+  .item{padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px}
+  .item:last-child{border-bottom:none}
+  .item small{display:block;color:var(--muted);margin-top:2px}
+  .tag{font-weight:600;text-transform:capitalize}
+  .tag.snake{color:var(--snake)} .tag.scorpion{color:var(--scorp)} .tag.both{color:var(--bad)}
+  .empty{padding:14px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Snake &amp; Scorpion Camera</h1>
+  <span class="pill" id="pill"><i></i><span id="pill-text">connecting…</span></span>
+  <div class="server">
+    Server
+    <input id="server" value="http://127.0.0.1:8003" aria-label="Server address">
+    <button onclick="connect()">Connect</button>
+  </div>
+</header>
+
+<div class="alert-banner" id="banner"></div>
+
+<main>
+  <section class="card">
+    <h2>Live camera</h2>
+    <div class="video down" id="video">
+      <img id="feed" alt="Live camera feed">
+      <div class="msg" id="video-msg">Waiting for the detection server…</div>
+    </div>
+    <div class="toolbar">
+      <button class="primary" onclick="snapshot()">Save snapshot</button>
+      <button onclick="fullscreen()">Full screen</button>
+      <button onclick="reloadFeed()">Reload video</button>
+    </div>
+  </section>
+
+  <aside class="side">
+    <div class="card">
+      <h2>Status</h2>
+      <div class="stats">
+        <div class="stat"><b id="s-fps">–</b><span>Frames / sec</span></div>
+        <div class="stat"><b id="s-proc">–</b><span>Frames checked</span></div>
+        <div class="stat"><b id="s-snake">–</b><span>Snake images</span></div>
+        <div class="stat"><b id="s-scorp">–</b><span>Scorpion images</span></div>
+      </div>
+      <div class="item">Model: <span id="s-model">–</span><small id="s-model-note"></small></div>
+    </div>
+
+    <div class="card">
+      <h2>Detected now</h2>
+      <div class="list" id="current"><div class="empty">Nothing detected.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Alerts</h2>
+      <div class="list" id="alerts"><div class="empty">No alerts yet.</div></div>
+    </div>
+  </aside>
+</main>
+
+<script>
+let base = document.getElementById('server').value;
+let lastAlertId = null;
+
+function connect(){
+  base = document.getElementById('server').value.replace(/\/+$/, '');
+  reloadFeed();
+  tick();
+}
+
+function reloadFeed(){
+  document.getElementById('feed').src = base + '/video_feed?t=' + Date.now();
+}
+
+const feed = document.getElementById('feed');
+feed.onload  = () => document.getElementById('video').classList.remove('down');
+feed.onerror = () => {
+  document.getElementById('video').classList.add('down');
+  document.getElementById('video-msg').textContent =
+    'Cannot load video from ' + base + ' — is the detection server running?';
+  setTimeout(reloadFeed, 3000);
+};
+
+function setLive(on, text){
+  document.getElementById('pill').classList.toggle('live', on);
+  document.getElementById('pill-text').textContent = text;
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+async function tick(){
+  try{
+    const s = await (await fetch(base + '/api/status')).json();
+    setLive(s.stream_connected, s.stream_connected ? 'camera live' : 'camera offline');
+    document.getElementById('s-fps').textContent   = s.fps;
+    document.getElementById('s-proc').textContent  = s.processed;
+    document.getElementById('s-snake').textContent = s.saved.snake;
+    document.getElementById('s-scorp').textContent = s.saved.scorpion;
+    const cls = s.classifier || {};
+    document.getElementById('s-model').textContent = s.mode || 'yolo';
+    document.getElementById('s-model-note').textContent = !cls.enabled
+      ? 'EfficientNet-B3 verifier off' + (cls.error ? ' — ' + cls.error : '')
+      : cls.dead_bn_variances ? 'EfficientNet-B3 weights degraded (' + cls.dead_bn_variances + ' BatchNorm variances lost) — re-export the model'
+      : 'EfficientNet-B3 verifier on, threshold ' + cls.threshold;
+
+    document.getElementById('current').innerHTML = s.current.length
+      ? s.current.map(d => `<div class="item"><span class="tag ${esc(d.species)}">${esc(d.species)}</span>
+           ${(d.confidence * 100).toFixed(0)}%<small>${esc(d.timestamp)}${d.classifier
+             ? ' · EfficientNet: ' + esc(d.classifier.label) + ' ' + (d.classifier.confidence * 100).toFixed(0) + '%' : ''}</small></div>`).join('')
+      : '<div class="empty">Nothing detected.</div>';
+
+    const a = s.latest_alert, banner = document.getElementById('banner');
+    if (a && a.id !== lastAlertId){ lastAlertId = a.id; loadAlerts(); }
+    if (a && Date.now() - Date.parse(a.timestamp) < 20000){
+      banner.textContent = '⚠ ' + a.message + '  (' + a.timestamp.replace('T', ' ') + ')';
+      banner.classList.add('on');
+    } else banner.classList.remove('on');
+  }catch(e){
+    setLive(false, 'server unreachable');
+  }
+}
+
+async function loadAlerts(){
+  try{
+    const d = await (await fetch(base + '/api/alerts?limit=20')).json();
+    document.getElementById('alerts').innerHTML = d.alerts.length
+      ? d.alerts.map(a => `<div class="item"><span class="tag ${esc(a.species)}">${esc(a.species)}</span>
+           — ${esc(a.severity)}<small>${esc(a.timestamp.replace('T', ' '))} · ${esc(a.source)}</small></div>`).join('')
+      : '<div class="empty">No alerts yet.</div>';
+  }catch(e){}
+}
+
+function snapshot(){
+  const img = document.getElementById('feed');
+  if (!img.naturalWidth) return;
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth; c.height = img.naturalHeight;
+  try{
+    c.getContext('2d').drawImage(img, 0, 0);
+    const a = document.createElement('a');
+    a.download = 'snapshot_' + new Date().toISOString().replace(/[:.]/g, '-') + '.jpg';
+    a.href = c.toDataURL('image/jpeg', 0.9);
+    a.click();
+  }catch(e){
+    window.open(img.src, '_blank');
+  }
+}
+
+function fullscreen(){
+  const v = document.getElementById('video');
+  (v.requestFullscreen || v.webkitRequestFullscreen).call(v);
+}
+
+connect();
+loadAlerts();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
