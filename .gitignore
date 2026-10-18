@@ -1,0 +1,30 @@
+# ---- Python ----
+.venv*/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# ---- Node / React Native ----
+node_modules/
+Frontend/android/build/
+Frontend/android/app/build/
+Frontend/android/app/.cxx/
+Frontend/android/.gradle/
+Frontend/android/local.properties
+Frontend/ios/Pods/
+Frontend/ios/build/
+*.log
+
+# ---- Model weights over GitHub's 100 MB limit ----
+# Ultralytics auto-downloads this CLIP model into weights/ on first run.
+Backend/Behaviour detection/weights/
+
+# ---- Runtime output (camera frames, alerts, logs) ----
+Backend/Behaviour detection/Chicken_CCTV_Abnormal_Events/
+Backend/Snake&Scropiens Detection/detection/
+Backend/Disease_detection/gradcam_outputs/
+*.jsonl
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
