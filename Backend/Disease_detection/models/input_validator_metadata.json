@@ -1,0 +1,18 @@
+{
+    "model_name": "Poultry Input-Type Validator",
+    "architecture": "MobileNetV2 Transfer Learning",
+    "classes": [
+        "BODY",
+        "FECAL",
+        "OTHER"
+    ],
+    "input_size": [
+        224,
+        224,
+        3
+    ],
+    "purpose": "Validate whether an uploaded image is BODY, FECAL, or OTHER before poultry disease prediction.",
+    "test_accuracy": 0.995485,
+    "training_images": 1584,
+    "random_seed": 42
+}

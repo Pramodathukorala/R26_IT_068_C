@@ -1,0 +1,2336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Poultry Disease AI</title>
+
+
+    <style>
+
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+
+            font-family:
+                Arial,
+                sans-serif;
+
+            background:
+                #f4f6f8;
+
+            color:
+                #1f2937;
+
+            min-height:
+                100vh;
+        }
+
+
+        .container {
+
+            max-width:
+                900px;
+
+            margin:
+                35px auto;
+
+            padding:
+                20px;
+        }
+
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .header {
+
+            text-align:
+                center;
+
+            margin-bottom:
+                25px;
+        }
+
+
+        .header h1 {
+
+            margin-bottom:
+                8px;
+
+            font-size:
+                34px;
+        }
+
+
+        .header p {
+
+            color:
+                #6b7280;
+
+            font-size:
+                16px;
+        }
+
+
+        /* =====================================================
+           CARDS
+        ===================================================== */
+
+        .card {
+
+            background:
+                white;
+
+            padding:
+                25px;
+
+            border-radius:
+                14px;
+
+            margin-bottom:
+                20px;
+
+            box-shadow:
+                0 2px 12px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.08
+                );
+        }
+
+
+        /* =====================================================
+           SCAN TYPE
+        ===================================================== */
+
+        .scan-type {
+
+            display:
+                flex;
+
+            gap:
+                12px;
+
+            margin:
+                20px 0;
+        }
+
+
+        .scan-btn {
+
+            flex:
+                1;
+
+            padding:
+                14px;
+
+            border:
+                2px solid
+                #d1d5db;
+
+            border-radius:
+                9px;
+
+            background:
+                white;
+
+            cursor:
+                pointer;
+
+            font-size:
+                16px;
+
+            transition:
+                0.2s;
+        }
+
+
+        .scan-btn:hover {
+
+            border-color:
+                #93c5fd;
+        }
+
+
+        .scan-btn.active {
+
+            border-color:
+                #2563eb;
+
+            background:
+                #eff6ff;
+
+            color:
+                #1d4ed8;
+
+            font-weight:
+                bold;
+        }
+
+
+        /* =====================================================
+           FILE INPUT
+        ===================================================== */
+
+        input[type="file"] {
+
+            width:
+                100%;
+
+            margin:
+                15px 0;
+
+            padding:
+                12px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius:
+                8px;
+
+            background:
+                white;
+        }
+
+
+        /* =====================================================
+           IMAGE PREVIEW
+        ===================================================== */
+
+        .preview {
+
+            display:
+                none;
+
+            width:
+                100%;
+
+            max-height:
+                350px;
+
+            object-fit:
+                contain;
+
+            margin-top:
+                15px;
+
+            border-radius:
+                10px;
+
+            border:
+                1px solid
+                #e5e7eb;
+        }
+
+
+        /* =====================================================
+           ANALYZE BUTTON
+        ===================================================== */
+
+        .analyze-btn {
+
+            width:
+                100%;
+
+            margin-top:
+                18px;
+
+            padding:
+                15px;
+
+            border:
+                none;
+
+            border-radius:
+                9px;
+
+            background:
+                #2563eb;
+
+            color:
+                white;
+
+            font-size:
+                16px;
+
+            cursor:
+                pointer;
+
+            transition:
+                0.2s;
+        }
+
+
+        .analyze-btn:hover {
+
+            background:
+                #1d4ed8;
+        }
+
+
+        .analyze-btn:disabled {
+
+            background:
+                #9ca3af;
+
+            cursor:
+                not-allowed;
+        }
+
+
+        /* =====================================================
+           STATUS
+        ===================================================== */
+
+        .status {
+
+            display:
+                none;
+
+            text-align:
+                center;
+
+            margin:
+                20px 0;
+
+            font-weight:
+                bold;
+        }
+
+
+        /* =====================================================
+           RESULT
+        ===================================================== */
+
+        .result-card {
+
+            display:
+                none;
+        }
+
+
+        .prediction {
+
+            font-size:
+                30px;
+
+            font-weight:
+                bold;
+
+            margin:
+                10px 0
+                18px 0;
+        }
+
+
+        .result-row {
+
+            margin:
+                12px 0;
+        }
+
+
+        .result-label {
+
+            font-weight:
+                bold;
+        }
+
+
+        /* =====================================================
+           RISK BADGE
+        ===================================================== */
+
+        .risk-badge {
+
+            display:
+                inline-block;
+
+            padding:
+                6px 12px;
+
+            border-radius:
+                20px;
+
+            font-weight:
+                bold;
+        }
+
+
+        .risk-low {
+
+            background:
+                #dcfce7;
+
+            color:
+                #166534;
+        }
+
+
+        .risk-medium {
+
+            background:
+                #fef3c7;
+
+            color:
+                #92400e;
+        }
+
+
+        .risk-high {
+
+            background:
+                #fee2e2;
+
+            color:
+                #991b1b;
+        }
+
+
+        .risk-uncertain {
+
+            background:
+                #e5e7eb;
+
+            color:
+                #374151;
+        }
+
+
+        /* =====================================================
+           SECTIONS
+        ===================================================== */
+
+        .section {
+
+            margin-top:
+                26px;
+        }
+
+
+        .section h3 {
+
+            margin-bottom:
+                12px;
+
+            font-size:
+                21px;
+        }
+
+
+        .section h4 {
+
+            font-size:
+                16px;
+        }
+
+
+        /* =====================================================
+           VISUAL CHART CARD
+        ===================================================== */
+
+        .chart-card {
+
+            margin-top:
+                16px;
+
+            padding:
+                18px;
+
+            background:
+                #f8fafc;
+
+            border:
+                1px solid
+                #e5e7eb;
+
+            border-radius:
+                12px;
+        }
+
+
+        .chart-title {
+
+            font-size:
+                17px;
+
+            font-weight:
+                bold;
+
+            margin-bottom:
+                14px;
+        }
+
+
+        /* =====================================================
+           CONFIDENCE BAR
+        ===================================================== */
+
+        .confidence-track {
+
+            width:
+                100%;
+
+            height:
+                18px;
+
+            background:
+                #e5e7eb;
+
+            border-radius:
+                20px;
+
+            overflow:
+                hidden;
+        }
+
+
+        .confidence-fill {
+
+            width:
+                0%;
+
+            height:
+                100%;
+
+            border-radius:
+                20px;
+
+            transition:
+                width
+                0.6s ease;
+
+            background:
+                #16a34a;
+        }
+
+
+        .confidence-value {
+
+            margin-top:
+                9px;
+
+            font-size:
+                21px;
+
+            font-weight:
+                bold;
+        }
+
+
+        /* =====================================================
+           DONUT CHART
+        ===================================================== */
+
+        .donut-layout {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                30px;
+
+            flex-wrap:
+                wrap;
+        }
+
+
+        .donut-chart {
+
+            width:
+                190px;
+
+            height:
+                190px;
+
+            border-radius:
+                50%;
+
+            background:
+                conic-gradient(
+                    #d1d5db
+                    0%
+                    100%
+                );
+
+            position:
+                relative;
+
+            flex-shrink:
+                0;
+        }
+
+
+        .donut-chart::after {
+
+            content:
+                "";
+
+            position:
+                absolute;
+
+            width:
+                112px;
+
+            height:
+                112px;
+
+            background:
+                white;
+
+            border-radius:
+                50%;
+
+            top:
+                50%;
+
+            left:
+                50%;
+
+            transform:
+                translate(
+                    -50%,
+                    -50%
+                );
+        }
+
+
+        .donut-center {
+
+            position:
+                absolute;
+
+            top:
+                50%;
+
+            left:
+                50%;
+
+            transform:
+                translate(
+                    -50%,
+                    -50%
+                );
+
+            z-index:
+                2;
+
+            text-align:
+                center;
+
+            font-size:
+                21px;
+
+            font-weight:
+                bold;
+
+            color:
+                #111827;
+        }
+
+
+        /* =====================================================
+           PROBABILITY LEGEND
+        ===================================================== */
+
+        .probability-legend {
+
+            flex:
+                1;
+
+            min-width:
+                220px;
+        }
+
+
+        .probability-row {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            gap:
+                20px;
+
+            padding:
+                10px 0;
+
+            border-bottom:
+                1px solid
+                #e5e7eb;
+        }
+
+
+        .probability-row:last-child {
+
+            border-bottom:
+                none;
+        }
+
+
+        .probability-name {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                9px;
+        }
+
+
+        .probability-dot {
+
+            width:
+                13px;
+
+            height:
+                13px;
+
+            border-radius:
+                50%;
+
+            flex-shrink:
+                0;
+        }
+
+
+        .probability-value {
+
+            font-weight:
+                bold;
+        }
+
+
+        /* =====================================================
+           RECOMMENDATIONS
+        ===================================================== */
+
+        ul {
+
+            padding-left:
+                24px;
+
+            margin-top:
+                8px;
+        }
+
+
+        li {
+
+            margin-bottom:
+                8px;
+
+            line-height:
+                1.45;
+        }
+
+
+        /* =====================================================
+           WARNING
+        ===================================================== */
+
+        .warning-box {
+
+            margin-top:
+                18px;
+
+            padding:
+                15px;
+
+            background:
+                #fff7ed;
+
+            border-left:
+                4px solid
+                #f97316;
+
+            border-radius:
+                7px;
+
+            line-height:
+                1.5;
+        }
+
+
+        /* =====================================================
+           HEATMAP
+        ===================================================== */
+
+        .heatmap {
+
+            width:
+                100%;
+
+            max-width:
+                500px;
+
+            margin-top:
+                15px;
+
+            border-radius:
+                10px;
+
+            display:
+                none;
+        }
+
+
+        /* =====================================================
+           ERROR
+        ===================================================== */
+
+        .error-card {
+
+            display:
+                none;
+
+            background:
+                #fff1f2;
+
+            border:
+                1px solid
+                #fecdd3;
+        }
+
+
+        .error-title {
+
+            color:
+                #be123c;
+
+            font-weight:
+                bold;
+
+            margin-bottom:
+                10px;
+
+            font-size:
+                18px;
+        }
+
+
+        #errorMessage {
+
+            line-height:
+                1.5;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (
+            max-width:
+                600px
+        ) {
+
+            .container {
+
+                margin:
+                    15px auto;
+
+                padding:
+                    12px;
+            }
+
+
+            .scan-type {
+
+                flex-direction:
+                    column;
+            }
+
+
+            .card {
+
+                padding:
+                    18px;
+            }
+
+
+            .donut-layout {
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    center;
+            }
+
+
+            .probability-legend {
+
+                width:
+                    100%;
+
+                min-width:
+                    auto;
+            }
+
+
+            .header h1 {
+
+                font-size:
+                    28px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- =================================================
+         HEADER
+    ================================================== -->
+
+    <div class="header">
+
+        <h1>
+            Poultry Disease AI
+        </h1>
+
+        <p>
+            AI-assisted poultry disease screening for farmers
+        </p>
+
+    </div>
+
+
+    <!-- =================================================
+         NEW SCAN
+    ================================================== -->
+
+    <div class="card">
+
+        <h2>
+            New Scan
+        </h2>
+
+
+        <div class="scan-type">
+
+            <button
+                id="fecalButton"
+                class="scan-btn active"
+                onclick="selectScanType('fecal')"
+            >
+                Fecal Scan
+            </button>
+
+
+            <button
+                id="bodyButton"
+                class="scan-btn"
+                onclick="selectScanType('body')"
+            >
+                Body Scan
+            </button>
+
+        </div>
+
+
+        <input
+            type="file"
+            id="imageInput"
+            accept="image/*"
+        >
+
+
+        <img
+            id="preview"
+            class="preview"
+            alt="Selected Image Preview"
+        >
+
+
+        <button
+            id="analyzeButton"
+            class="analyze-btn"
+            onclick="analyzeImage()"
+        >
+            Analyze Image
+        </button>
+
+    </div>
+
+
+    <!-- =================================================
+         STATUS
+    ================================================== -->
+
+    <div
+        id="status"
+        class="status"
+    >
+        Analyzing image...
+    </div>
+
+
+    <!-- =================================================
+         ERROR
+    ================================================== -->
+
+    <div
+        id="errorCard"
+        class="card error-card"
+    >
+
+        <div class="error-title">
+            Scan could not be completed
+        </div>
+
+        <div id="errorMessage"></div>
+
+    </div>
+
+
+    <!-- =================================================
+         RESULT
+    ================================================== -->
+
+    <div
+        id="resultCard"
+        class="card result-card"
+    >
+
+        <h2>
+            AI Screening Result
+        </h2>
+
+
+        <div
+            id="prediction"
+            class="prediction"
+        ></div>
+
+
+        <div class="result-row">
+
+            <span class="result-label">
+                Confidence:
+            </span>
+
+            <span id="confidence"></span>
+
+        </div>
+
+
+        <div class="result-row">
+
+            <span class="result-label">
+                Risk Level:
+            </span>
+
+            <span
+                id="riskLevel"
+                class="risk-badge"
+            ></span>
+
+        </div>
+
+
+        <div class="result-row">
+
+            <span class="result-label">
+                Scan Type:
+            </span>
+
+            <span id="scanType"></span>
+
+        </div>
+
+
+        <!-- =============================================
+             VISUAL AI OVERVIEW
+        ============================================== -->
+
+        <div class="section">
+
+            <h3>
+                AI Prediction Overview
+            </h3>
+
+
+            <!-- CONFIDENCE CHART -->
+
+            <div class="chart-card">
+
+                <div class="chart-title">
+                    AI Confidence
+                </div>
+
+
+                <div class="confidence-track">
+
+                    <div
+                        id="confidenceBar"
+                        class="confidence-fill"
+                    ></div>
+
+                </div>
+
+
+                <div
+                    id="confidenceChartValue"
+                    class="confidence-value"
+                >
+                    0%
+                </div>
+
+            </div>
+
+
+            <!-- DISEASE PROBABILITY DONUT -->
+
+            <div class="chart-card">
+
+                <div class="chart-title">
+                    Disease Probability
+                </div>
+
+
+                <div class="donut-layout">
+
+
+                    <div
+                        id="probabilityDonut"
+                        class="donut-chart"
+                    >
+
+                        <div
+                            id="donutCenter"
+                            class="donut-center"
+                        >
+                            0%
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="probabilities"
+                        class="probability-legend"
+                    ></div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =============================================
+             GUIDANCE
+        ============================================== -->
+
+        <div class="section">
+
+            <h3>
+                Recommended Guidance
+            </h3>
+
+
+            <!-- Kept hidden because Risk Level is already shown -->
+
+            <div
+                id="severity"
+                style="display: none;"
+            ></div>
+
+
+            <h4
+                style="margin-top: 14px;"
+            >
+                Recommended Actions
+            </h4>
+
+
+            <ul id="actions"></ul>
+
+
+            <h4
+                style="margin-top: 16px;"
+            >
+                Prevention
+            </h4>
+
+
+            <ul id="prevention"></ul>
+
+
+            <div
+                id="warningContainer"
+                class="warning-box"
+            >
+
+                <strong>
+                    Important
+                </strong>
+
+
+                <div
+                    id="warning"
+                    style="margin-top: 7px;"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =============================================
+             GRAD-CAM
+        ============================================== -->
+
+        <div class="section">
+
+            <h3>
+                AI Attention Heatmap
+            </h3>
+
+
+            <img
+                id="heatmap"
+                class="heatmap"
+                alt="AI Attention Heatmap"
+            >
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+    /* =====================================================
+       GLOBAL STATE
+    ===================================================== */
+
+    let selectedScanType =
+        "fecal";
+
+
+    /* =====================================================
+       SELECT SCAN TYPE
+    ===================================================== */
+
+    function selectScanType(
+        type
+    ) {
+
+        selectedScanType =
+            type;
+
+
+        const fecalButton =
+            document.getElementById(
+                "fecalButton"
+            );
+
+
+        const bodyButton =
+            document.getElementById(
+                "bodyButton"
+            );
+
+
+        if (
+            type ===
+            "fecal"
+        ) {
+
+            fecalButton
+                .classList
+                .add(
+                    "active"
+                );
+
+
+            bodyButton
+                .classList
+                .remove(
+                    "active"
+                );
+
+
+        } else {
+
+
+            bodyButton
+                .classList
+                .add(
+                    "active"
+                );
+
+
+            fecalButton
+                .classList
+                .remove(
+                    "active"
+                );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       IMAGE PREVIEW
+    ===================================================== */
+
+    const imageInput =
+        document.getElementById(
+            "imageInput"
+        );
+
+
+    imageInput.addEventListener(
+        "change",
+        function () {
+
+            const file =
+                imageInput.files[0];
+
+
+            const preview =
+                document.getElementById(
+                    "preview"
+                );
+
+
+            if (!file) {
+
+                preview.style.display =
+                    "none";
+
+                return;
+
+            }
+
+
+            const imageURL =
+                URL.createObjectURL(
+                    file
+                );
+
+
+            preview.src =
+                imageURL;
+
+
+            preview.style.display =
+                "block";
+
+        }
+    );
+
+
+    /* =====================================================
+       ANALYZE IMAGE
+    ===================================================== */
+
+    async function analyzeImage() {
+
+
+        const file =
+            imageInput.files[0];
+
+
+        if (!file) {
+
+            showError(
+                "Please select an image first."
+            );
+
+            return;
+
+        }
+
+
+        const status =
+            document.getElementById(
+                "status"
+            );
+
+
+        const resultCard =
+            document.getElementById(
+                "resultCard"
+            );
+
+
+        const errorCard =
+            document.getElementById(
+                "errorCard"
+            );
+
+
+        const analyzeButton =
+            document.getElementById(
+                "analyzeButton"
+            );
+
+
+        status.style.display =
+            "block";
+
+
+        resultCard.style.display =
+            "none";
+
+
+        errorCard.style.display =
+            "none";
+
+
+        analyzeButton.disabled =
+            true;
+
+
+        const formData =
+            new FormData();
+
+
+        formData.append(
+            "file",
+            file
+        );
+
+
+        const endpoint =
+
+            selectedScanType ===
+            "fecal"
+
+                ? "/predict/fecal"
+
+                : "/predict/body";
+
+
+        try {
+
+
+            const response =
+                await fetch(
+                    endpoint,
+                    {
+                        method:
+                            "POST",
+
+                        body:
+                            formData
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok
+            ) {
+
+
+                let message =
+                    "The image could not be analyzed.";
+
+
+                if (
+                    data.detail &&
+                    typeof data.detail ===
+                        "object"
+                ) {
+
+
+                    message =
+                        data.detail.message
+                        ||
+                        message;
+
+
+                    if (
+                        data.detail.action
+                    ) {
+
+                        message +=
+                            " " +
+                            data.detail.action;
+
+                    }
+
+
+                } else if (
+                    data.detail
+                ) {
+
+
+                    message =
+                        data.detail;
+
+                }
+
+
+                showError(
+                    message
+                );
+
+
+                return;
+
+            }
+
+
+            displayResult(
+                data
+            );
+
+
+        } catch (
+            error
+        ) {
+
+
+            console.error(
+                error
+            );
+
+
+            showError(
+                "Unable to connect to the AI backend."
+            );
+
+
+        } finally {
+
+
+            status.style.display =
+                "none";
+
+
+            analyzeButton.disabled =
+                false;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       DISPLAY RESULT
+    ===================================================== */
+
+    function displayResult(
+        data
+    ) {
+
+
+        document.getElementById(
+            "errorCard"
+        ).style.display =
+            "none";
+
+
+        document.getElementById(
+            "resultCard"
+        ).style.display =
+            "block";
+
+
+        /* -------------------------------------------------
+           DISEASE
+        -------------------------------------------------- */
+
+        document.getElementById(
+            "prediction"
+        ).textContent =
+            data.prediction;
+
+
+        /* -------------------------------------------------
+           CONFIDENCE TEXT
+        -------------------------------------------------- */
+
+        document.getElementById(
+            "confidence"
+        ).textContent =
+            data.confidence +
+            "%";
+
+
+        /* -------------------------------------------------
+           CONFIDENCE CHART
+        -------------------------------------------------- */
+
+        updateConfidenceChart(
+            data.confidence
+        );
+
+
+        /* -------------------------------------------------
+           RISK LEVEL
+        -------------------------------------------------- */
+
+        const riskElement =
+            document.getElementById(
+                "riskLevel"
+            );
+
+
+        riskElement.textContent =
+            data.risk_level;
+
+
+        riskElement.className =
+            "risk-badge";
+
+
+        if (
+            data.risk_level ===
+            "Low"
+        ) {
+
+
+            riskElement
+                .classList
+                .add(
+                    "risk-low"
+                );
+
+
+        } else if (
+            data.risk_level ===
+            "Medium"
+        ) {
+
+
+            riskElement
+                .classList
+                .add(
+                    "risk-medium"
+                );
+
+
+        } else if (
+            data.risk_level ===
+            "High"
+        ) {
+
+
+            riskElement
+                .classList
+                .add(
+                    "risk-high"
+                );
+
+
+        } else {
+
+
+            riskElement
+                .classList
+                .add(
+                    "risk-uncertain"
+                );
+
+        }
+
+
+        /* -------------------------------------------------
+           SCAN TYPE
+        -------------------------------------------------- */
+
+        document.getElementById(
+            "scanType"
+        ).textContent =
+            data.scan_type;
+
+
+        /* -------------------------------------------------
+           DONUT / PROBABILITY CHART
+        -------------------------------------------------- */
+
+        displayProbabilities(
+            data.probabilities,
+            data.prediction
+        );
+
+
+        /* -------------------------------------------------
+           RECOMMENDATIONS
+        -------------------------------------------------- */
+
+        displayRecommendation(
+            data.recommendation
+        );
+
+
+        /* -------------------------------------------------
+           GRAD-CAM
+        -------------------------------------------------- */
+
+        const heatmap =
+            document.getElementById(
+                "heatmap"
+            );
+
+
+        if (
+            data.gradcam_image
+        ) {
+
+
+            heatmap.src =
+                data.gradcam_image;
+
+
+            heatmap.style.display =
+                "block";
+
+
+        } else {
+
+
+            heatmap.style.display =
+                "none";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CONFIDENCE CHART
+    ===================================================== */
+
+    function updateConfidenceChart(
+        confidence
+    ) {
+
+
+        const value =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Number(
+                        confidence
+                    )
+                    ||
+                    0
+                )
+            );
+
+
+        const confidenceBar =
+            document.getElementById(
+                "confidenceBar"
+            );
+
+
+        const confidenceValue =
+            document.getElementById(
+                "confidenceChartValue"
+            );
+
+
+        confidenceBar.style.width =
+            value +
+            "%";
+
+
+        confidenceValue.textContent =
+            value.toFixed(
+                2
+            ) +
+            "%";
+
+
+        /* ---------------------------------------------
+           CONFIDENCE COLORS
+        ---------------------------------------------- */
+
+        if (
+            value >=
+            80
+        ) {
+
+
+            confidenceBar.style.background =
+                "#16a34a";
+
+
+        } else if (
+            value >=
+            70
+        ) {
+
+
+            confidenceBar.style.background =
+                "#f59e0b";
+
+
+        } else {
+
+
+            confidenceBar.style.background =
+                "#dc2626";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       DISEASE COLOR
+    ===================================================== */
+
+    function getDiseaseColor(
+        diseaseName
+    ) {
+
+
+        const colors = {
+
+            "Healthy":
+                "#22c55e",
+
+            "Fowlpox":
+                "#f97316",
+
+            "Coccidiosis":
+                "#7c3aed",
+
+            "Newcastle":
+                "#ef4444"
+
+        };
+
+
+        return (
+            colors[
+                diseaseName
+            ]
+            ||
+            "#3b82f6"
+        );
+
+    }
+
+
+    /* =====================================================
+       PROBABILITY DONUT CHART
+    ===================================================== */
+
+    function displayProbabilities(
+        probabilities,
+        predictedDisease
+    ) {
+
+
+        const container =
+            document.getElementById(
+                "probabilities"
+            );
+
+
+        const donut =
+            document.getElementById(
+                "probabilityDonut"
+            );
+
+
+        const donutCenter =
+            document.getElementById(
+                "donutCenter"
+            );
+
+
+        container.innerHTML =
+            "";
+
+
+        if (
+            !probabilities
+        ) {
+
+
+            donut.style.background =
+                "#d1d5db";
+
+
+            donutCenter.textContent =
+                "0%";
+
+
+            return;
+
+        }
+
+
+        const entries =
+            Object.entries(
+                probabilities
+            );
+
+
+        let total =
+            entries.reduce(
+                (
+                    sum,
+                    entry
+                ) => {
+
+                    return (
+                        sum +
+                        (
+                            Number(
+                                entry[1]
+                            )
+                            ||
+                            0
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+        if (
+            total <=
+            0
+        ) {
+
+            total =
+                100;
+
+        }
+
+
+        let currentPercent =
+            0;
+
+
+        const gradientParts =
+            [];
+
+
+        entries.forEach(
+            (
+                [
+                    diseaseName,
+                    rawValue
+                ]
+            ) => {
+
+
+                const value =
+                    Number(
+                        rawValue
+                    )
+                    ||
+                    0;
+
+
+                const normalizedValue =
+                    (
+                        value /
+                        total
+                    )
+                    *
+                    100;
+
+
+                const start =
+                    currentPercent;
+
+
+                const end =
+                    currentPercent +
+                    normalizedValue;
+
+
+                const color =
+                    getDiseaseColor(
+                        diseaseName
+                    );
+
+
+                gradientParts.push(
+
+                    `${color} ${start}% ${end}%`
+
+                );
+
+
+                currentPercent =
+                    end;
+
+
+                /* -----------------------------------------
+                   LEGEND ROW
+                ------------------------------------------ */
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                row.className =
+                    "probability-row";
+
+
+                const nameContainer =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                nameContainer.className =
+                    "probability-name";
+
+
+                const dot =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                dot.className =
+                    "probability-dot";
+
+
+                dot.style.background =
+                    color;
+
+
+                const name =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                name.textContent =
+                    diseaseName;
+
+
+                const valueElement =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                valueElement.className =
+                    "probability-value";
+
+
+                valueElement.textContent =
+                    value.toFixed(
+                        2
+                    ) +
+                    "%";
+
+
+                nameContainer.appendChild(
+                    dot
+                );
+
+
+                nameContainer.appendChild(
+                    name
+                );
+
+
+                row.appendChild(
+                    nameContainer
+                );
+
+
+                row.appendChild(
+                    valueElement
+                );
+
+
+                container.appendChild(
+                    row
+                );
+
+            }
+        );
+
+
+        /* ---------------------------------------------
+           APPLY DONUT COLORS
+        ---------------------------------------------- */
+
+        donut.style.background =
+
+            `conic-gradient(${gradientParts.join(", ")})`;
+
+
+        /* ---------------------------------------------
+           CENTER VALUE = TOP PREDICTION
+        ---------------------------------------------- */
+
+        const predictedValue =
+
+            Number(
+                probabilities[
+                    predictedDisease
+                ]
+            )
+            ||
+            Math.max(
+                ...entries.map(
+                    entry =>
+                        Number(
+                            entry[1]
+                        )
+                        ||
+                        0
+                )
+            );
+
+
+        donutCenter.textContent =
+
+            predictedValue.toFixed(
+                1
+            ) +
+            "%";
+
+    }
+
+
+    /* =====================================================
+       RECOMMENDATION
+    ===================================================== */
+
+    function displayRecommendation(
+        recommendation
+    ) {
+
+
+        const severity =
+            document.getElementById(
+                "severity"
+            );
+
+
+        const actions =
+            document.getElementById(
+                "actions"
+            );
+
+
+        const prevention =
+            document.getElementById(
+                "prevention"
+            );
+
+
+        const warning =
+            document.getElementById(
+                "warning"
+            );
+
+
+        actions.innerHTML =
+            "";
+
+
+        prevention.innerHTML =
+            "";
+
+
+        if (
+            !recommendation
+        ) {
+
+
+            severity.textContent =
+                "";
+
+
+            warning.textContent =
+                "No recommendation available.";
+
+
+            return;
+
+        }
+
+
+        /* Severity intentionally hidden */
+
+        severity.textContent =
+            "";
+
+
+        /* ---------------------------------------------
+           ACTIONS
+        ---------------------------------------------- */
+
+        if (
+            Array.isArray(
+                recommendation.actions
+            )
+        ) {
+
+
+            recommendation.actions.forEach(
+                action => {
+
+
+                    const item =
+                        document.createElement(
+                            "li"
+                        );
+
+
+                    item.textContent =
+                        action;
+
+
+                    actions.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* ---------------------------------------------
+           PREVENTION
+        ---------------------------------------------- */
+
+        if (
+            Array.isArray(
+                recommendation.prevention
+            )
+        ) {
+
+
+            recommendation.prevention.forEach(
+                preventionText => {
+
+
+                    const item =
+                        document.createElement(
+                            "li"
+                        );
+
+
+                    item.textContent =
+                        preventionText;
+
+
+                    prevention.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* ---------------------------------------------
+           WARNING
+        ---------------------------------------------- */
+
+        warning.textContent =
+
+            recommendation.warning
+            ||
+            "";
+
+    }
+
+
+    /* =====================================================
+       SHOW ERROR
+    ===================================================== */
+
+    function showError(
+        message
+    ) {
+
+
+        document.getElementById(
+            "resultCard"
+        ).style.display =
+            "none";
+
+
+        document.getElementById(
+            "errorCard"
+        ).style.display =
+            "block";
+
+
+        document.getElementById(
+            "errorMessage"
+        ).textContent =
+            message;
+
+    }
+
+
+</script>
+
+
+</body>
+
+</html>

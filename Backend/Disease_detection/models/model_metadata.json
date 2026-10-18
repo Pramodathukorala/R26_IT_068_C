@@ -1,0 +1,22 @@
+{
+    "image_size": [
+        224,
+        224
+    ],
+    "architecture": "EfficientNetB0",
+    "fecal_model": {
+        "classes": {
+            "0": "Coccidiosis",
+            "1": "Healthy",
+            "2": "Newcastle"
+        },
+        "test_accuracy": 0.9819
+    },
+    "body_model": {
+        "classes": {
+            "0": "Fowlpox",
+            "1": "Healthy"
+        },
+        "test_accuracy": 0.9731
+    }
+}
