@@ -1,0 +1,17 @@
+{
+    "java.configuration.updateBuildConfiguration": "disabled",
+    "java.import.gradle.enabled": false,
+    "java.import.gradle.wrapper.enabled": false,
+    "java.import.maven.enabled": false,
+    "java.autobuild.enabled": false,
+    "java.project.importOnFirstTimeStartup": "disabled",
+    "gradle.nestedProjects": false,
+    "gradle.autoDetect": "off",
+    "files.watcherExclude": {
+        "**/android/.gradle/**": true,
+        "**/android/build/**": true,
+        "**/android/app/build/**": true,
+        "**/android/app/.cxx/**": true,
+        "**/node_modules/**": true
+    }
+}
