@@ -1,5 +1,6 @@
 import os
 import io
+import sys
 import uuid
 import traceback
 import numpy as np
@@ -30,6 +31,14 @@ from utils.image_quality import check_image_quality
 from utils.recommendation import get_recommendation
 
 from schemas.prediction_response import PredictionResponse
+
+# Shared captured-image store lives one level up in Backend/
+sys.path.insert(
+    0,
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
+
+from image_store import save_image
 
 
 # =========================================================
@@ -404,6 +413,13 @@ async def predict_fecal(
             image_bytes
         )
 
+        save_image(
+            component="disease_fecal",
+            filename=file.filename,
+            data=image_bytes,
+            content_type=file.content_type
+        )
+
         # -------------------------------------------------
         # IMAGE QUALITY
         # -------------------------------------------------
@@ -590,6 +606,13 @@ async def predict_body(
 
         image_array = prepare_image(
             image_bytes
+        )
+
+        save_image(
+            component="disease_body",
+            filename=file.filename,
+            data=image_bytes,
+            content_type=file.content_type
         )
 
         # -------------------------------------------------
