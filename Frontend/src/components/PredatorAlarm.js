@@ -13,6 +13,8 @@ import { WebView } from 'react-native-webview';
 import { Siren, Volume2, VolumeX, X } from 'lucide-react-native';
 import { COLORS, RADIUS, TYPOGRAPHY } from '../../theme';
 import { speciesEmoji, speciesLabel } from '../utils/predatorAlarmState';
+import { alarmSoundHtml } from '../utils/alarmSoundHtml';
+import PREDATOR_ALARM_SOUND from '../assets/sounds/predatorAlarm';
 
 // Palette of the (dark) predator screen this card sits on top of.
 const DARK = {
@@ -26,58 +28,16 @@ const DARK = {
 const DANGER_RED = '#C1121F';
 const DANGER_RED_DEEP = '#7A0B14';
 
-// The siren is generated with the Web Audio API inside a 1px WebView, the same
+// The siren plays the "alarm clock" MP3 inside a hidden 1px WebView, the same
 // way the chicken module's alarm is: react-native-webview is already a
 // dependency of this screen (it carries the MJPEG feed), so the alarm needs no
 // audio library and no native rebuild - it ships with a JS reload.
 // startSiren()/stopSiren() are driven from RN by injectJavaScript, and
 // mediaPlaybackRequiresUserAction={false} is what lets it sound without a tap.
 //
-// The tone is deliberately not the chicken alarm's two beeps: this one is a
-// rising/falling sawtooth wail, so a predator alert is audibly different from a
-// behaviour alert when both backends are running.
-const SIREN_HTML = `<!doctype html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;background:transparent">
-<script>
-  var ctx = null, timer = null;
-
-  function audio() {
-    if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); }
-    if (ctx.state === 'suspended') { ctx.resume(); }
-    return ctx;
-  }
-
-  // One swept note. Ramped rather than switched, so it does not click.
-  function wail(from, to, at, dur) {
-    var c = audio();
-    var osc = c.createOscillator();
-    var gain = c.createGain();
-    var t0 = c.currentTime + at;
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(from, t0);
-    osc.frequency.linearRampToValueAtTime(to, t0 + dur);
-    gain.gain.setValueAtTime(0.0001, t0);
-    gain.gain.exponentialRampToValueAtTime(0.35, t0 + 0.03);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    osc.connect(gain);
-    gain.connect(c.destination);
-    osc.start(t0);
-    osc.stop(t0 + dur + 0.03);
-  }
-
-  // Up-down emergency wail, repeated until stopped.
-  function cycle() { wail(620, 1180, 0, 0.34); wail(1180, 620, 0.36, 0.34); }
-
-  function startSiren() {
-    if (timer) { return; }
-    cycle();
-    timer = setInterval(cycle, 760);
-  }
-
-  function stopSiren() {
-    if (timer) { clearInterval(timer); timer = null; }
-  }
-</script></body></html>`;
+// It is deliberately a different sound from the behaviour alarm, so a predator
+// alert is audibly distinct from a behaviour alert when both backends run.
+const SIREN_HTML = alarmSoundHtml(PREDATOR_ALARM_SOUND, 'startSiren', 'stopSiren');
 
 /** Detection time, to the second - an alarm is about a moment, not a day. */
 function formatAlarmTime(iso) {
