@@ -14,6 +14,8 @@ import {
   Modal,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
+import BEHAVIOUR_ALARM_SOUND from '../assets/sounds/behaviourAlarm';
+import { alarmSoundHtml } from '../utils/alarmSoundHtml';
 import { LineChart } from 'react-native-chart-kit';
 import {
   Camera,
@@ -141,53 +143,13 @@ function streamHtml(url) {
 </body></html>`;
 }
 
-// The alarm tone is generated with the Web Audio API inside a 1px WebView.
+// The alarm plays the "digital alarm" MP3 inside a hidden 1px WebView.
 // react-native-webview is already a dependency here (it carries the MJPEG
 // stream), so the alarm needs no audio library and no native rebuild — it ships
 // with a JS reload. startAlarm()/stopAlarm() are driven from RN by
 // injectJavaScript. mediaPlaybackRequiresUserAction={false} is what lets it
 // sound without a tap.
-const ALARM_HTML = `<!doctype html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;background:transparent">
-<script>
-  var ctx = null, timer = null;
-
-  function audio() {
-    if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); }
-    if (ctx.state === 'suspended') { ctx.resume(); }
-    return ctx;
-  }
-
-  // One shaped beep. Ramped rather than switched, so it does not click.
-  function beep(freq, at, dur) {
-    var c = audio();
-    var osc = c.createOscillator();
-    var gain = c.createGain();
-    var t0 = c.currentTime + at;
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(freq, t0);
-    gain.gain.setValueAtTime(0.0001, t0);
-    gain.gain.exponentialRampToValueAtTime(0.3, t0 + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    osc.connect(gain);
-    gain.connect(c.destination);
-    osc.start(t0);
-    osc.stop(t0 + dur + 0.03);
-  }
-
-  // Two-tone emergency pattern, repeated until stopped.
-  function cycle() { beep(880, 0, 0.26); beep(660, 0.3, 0.26); }
-
-  function startAlarm() {
-    if (timer) { return; }
-    cycle();
-    timer = setInterval(cycle, 900);
-  }
-
-  function stopAlarm() {
-    if (timer) { clearInterval(timer); timer = null; }
-  }
-</script></body></html>`;
+const ALARM_HTML = alarmSoundHtml(BEHAVIOUR_ALARM_SOUND, 'startAlarm', 'stopAlarm');
 
 /** Small labelled tile used by the analytics row. */
 function StatTile({ icon, label, value }) {
