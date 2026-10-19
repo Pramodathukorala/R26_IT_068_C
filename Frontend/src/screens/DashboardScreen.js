@@ -47,7 +47,6 @@ const STATS_POLL_MS = 15000;
 
 // Shown while the first round of requests is still in flight.
 const LOADING_STATS = [
-  { label: 'Birds Detected', value: '…', unit: 'last check', color: COLORS.PRIMARY },
   { label: 'Alerts Today', value: '…', unit: 'events', color: COLORS.DANGER },
   { label: 'System Health', value: '…', unit: 'services up', color: COLORS.PRIMARY_LIGHT },
 ];
@@ -55,8 +54,7 @@ const LOADING_STATS = [
 /**
  * The quick-stats bar, built from what the three detectors actually report:
  *
- *   Birds Detected  chicken  GET /api/status        -> chicken_count
- *   Alerts Today    chicken  GET /api/events        -> ABNORMAL checks today
+ *   Alerts Today   chicken  GET /api/events        -> ABNORMAL checks today
  *                 + predator GET /api/stats/summary -> today.total
  *   System Health   how many of the three services answered
  *
@@ -92,12 +90,6 @@ async function loadFarmStats() {
 
   return [
     {
-      label: 'Birds Detected',
-      value: chickenUp ? String(chickenStatus.value.chicken_count ?? 0) : '—',
-      unit: chickenUp ? 'last check' : 'offline',
-      color: COLORS.PRIMARY,
-    },
-    {
       label: 'Alerts Today',
       value: chickenUp || predatorUp ? String(alertsToday) : '—',
       unit: 'events',
@@ -120,7 +112,7 @@ export default function DashboardScreen({ navigation }) {
   const load = useCallback(async () => {
     const next = await loadFarmStats();
     setStats(next);
-    const alerts = Number(next[1].value);
+    const alerts = Number(next[0].value);
     setAlertCount(Number.isNaN(alerts) ? 0 : alerts);
   }, []);
 
@@ -234,6 +226,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   statsRow: {
+    flexGrow: 1,
     paddingHorizontal: 16,
     gap: 10,
   },
@@ -243,6 +236,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     alignItems: 'center',
+    flex: 1,
     minWidth: 100,
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.05)',

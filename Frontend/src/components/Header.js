@@ -36,7 +36,7 @@ export default function Header({ notificationCount = 0 }) {
     <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
       {/* Logo */}
       <Image
-        source={require('../../assets/logo.png')}
+        source={require('../../assets/logo-header.png')}
         style={styles.logo}
         resizeMode="contain"
       />
@@ -73,8 +73,8 @@ const styles = StyleSheet.create({
     ...SHADOW_SM,
   },
   logo: {
-    width: 120,
-    height: 38,
+    width: 130,
+    height: 50,
   },
   statusCenter: {
     flexDirection: 'row',
