@@ -20,6 +20,7 @@ os.environ.setdefault(
 import argparse
 import csv
 import json
+import sys
 import threading
 import time
 from collections import Counter, defaultdict, deque
@@ -48,6 +49,10 @@ except ImportError:
 # ============================================================
 
 ROOT = Path(__file__).resolve().parent
+
+# Shared captured-image store lives one level up in Backend/
+sys.path.insert(0, str(ROOT.parent))
+from image_store import save_image
 MODEL_CANDIDATES = [
     ROOT / "2nd best_efficientnet_b3.pth",
     Path(r"C:\Users\TechZiz.lk\Downloads\2nd best_efficientnet_b3.pth"),
@@ -220,6 +225,8 @@ def save_detection(frame, species, conf, probs=None):
 
     img_path = OUTPUT_DIR / species / f"{species}_{stamp}_{ms}_conf{conf:.2f}.jpg"
     cv2.imwrite(str(img_path), frame)
+    if img_path.exists():
+        save_image(f"predator_{species}", img_path.name, img_path.read_bytes())
 
     with log_lock:
         new = not LOG_FILE.exists()

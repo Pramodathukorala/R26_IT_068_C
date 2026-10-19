@@ -6,3 +6,4 @@ Pillow
 python-multipart
 opencv-python-headless
 pydantic
+pymongo
